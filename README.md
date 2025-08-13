@@ -74,19 +74,13 @@ Finally, a **rolling backtest** automatically selects the best-performing engine
 ## 📊 Demo Outputs (examples)
 
 - FFT spectrum & dominant period: `output/fft_spectrum.png`  
-  ![FFT](output/fft.png)
+  ![FFT](output/fft.PNG)
 
 - Up/Down probability printout: `output/probabilities_example.png`  
-  ![Probabilities](output/probabilities_example.png)
+  ![Probabilities](output/prob.PNG)
 
 - Cycle metrics & phase progress: `output/phase_progress.png`  
-  ![Phase](output/phase_progress.png)
-
-- (Optional) Trendlines with signals: `output/trendlines_signals.png`  
-- (Optional) Model selection (Brier comparison): `output/model_selection_brier.png`  
-
-> Replace the filenames above with the actual artifacts inside your `output/` folder.
-
+  ![Phase](output/pERIOD.PNG)
 ---
 
 ## 🧮 Math Notes (Core Formulas)
