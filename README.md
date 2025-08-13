@@ -1,4 +1,4 @@
-# Cycle-Aware Probabilistic Stock Demo
+# FFT + Probabilistic Stock Demo
 
 This project demonstrates a **cycle-centric** workflow for probabilistic stock forecasting:
 we first use **FFT** to detect the dominant cycle and choose a **stable observation window**,
@@ -11,7 +11,7 @@ Finally, a **rolling backtest** automatically selects the best-performing engine
 
 ---
 
-## ✨ Features
+## Features
 
 - **FFT cycle detection**: de-mean → FFT → pick peak frequency → convert to **period (days)**
 - **Best observation window X**: scan windows and pick the one whose dominant period is most **stable** (closest to an integer)
@@ -25,7 +25,7 @@ Finally, a **rolling backtest** automatically selects the best-performing engine
 
 ---
 
-## 🧱 Pipeline
+##  Pipeline
 
 1. Download market data (e.g., Yahoo Finance)  
 2. Preprocess (de-meaned series, indicators, **daily log-returns**)  
@@ -187,6 +187,7 @@ Contact
 For full implementation or custom adaptations:
 
 Kai Yeh
+
 📧 Email: KaiYeh820206@gmail.com
 💻 GitHub: WayneKaiYeh
 ---
