@@ -83,89 +83,102 @@ Finally, a **rolling backtest** automatically selects the best-performing engine
   ![Phase](output/period.PNG)
 ---
 
-## 🧮 Math Notes (Core Formulas)
+##  Math Notes (Core Formulas)
 
 ### 1) FFT Dominant Period (Frequency → Period)
-Apply DFT to the **de-meaned** price series \(x_t - \bar{x}\), keep **positive frequencies**, and pick the peak frequency \(\hat{f}\).  
+Apply DFT to the **de-meaned** price series `x_t - x̄`, keep **positive frequencies**, and pick the peak frequency `f̂`.  
 The dominant **period** (trading days per cycle):
-\[
-\hat{P} = \frac{1}{\hat{f}}.
-\]
 
-### 2) Best Observation Window \(X\)
-Scan \(X \in [30, 200]\) (configurable step). For each window, run FFT to obtain \(\hat{P}_X\).  
-Define **stability** by proximity of \(\hat{P}_X\) to an integer:
-\[
-\text{frac} = \hat{P}_X - \lfloor \hat{P}_X \rfloor,\quad
-\text{stability}(X)=
-\begin{cases}
-+\infty & \text{if } \text{frac}=0,\\[4pt]
-\frac{1}{\min(\text{frac},1-\text{frac})} & \text{otherwise.}
-\end{cases}
-\]
-Pick \(X\) with the largest stability.
+```
+P̂ = 1 / f̂
+```
+
+### 2) Best Observation Window (X)
+Scan `X ∈ [30, 200]` (configurable step). For each window, run FFT to obtain `P̂_X`.  
+Define **stability** by proximity of `P̂_X` to an integer:
+
+```
+frac = P̂_X - ⌊P̂_X⌋
+
+stability(X) = {
+    +∞,                           if frac = 0
+    1 / min(frac, 1 - frac),     otherwise
+}
+```
+
+Pick `X` with the largest stability.
 
 ### 3) Return-Driven Period (within candidates)
-For each candidate \(P\) (e.g., 15–45 days), take the most recent \(P\) days:
-\[
-\text{Return}(P)=\frac{\max(S)-\min(S)}{\min(S)}\times 100\%.
-\]
-Choose the \(P\) that maximizes \(\text{Return}(P)\).
+For each candidate `P` (e.g., 15–45 days), take the most recent `P` days:
+
+```
+Return(P) = (max(S) - min(S)) / min(S) × 100%
+```
+
+Choose the `P` that maximizes `Return(P)`.
 
 ### 4) Phase Progress (Time within the cycle)
 Using the **most recent local low** within the latest period window as a phase anchor:
-\[
-\text{progress}=\frac{(\text{days\_since\_last\_low})\bmod P}{P},\qquad
-\theta=2\pi\cdot \text{progress},
-\]
-where \(\theta\) is the phase angle and \(\text{progress}\in[0,1)\) is the cycle time progress.
 
-### 5) Annualized Volatility → \(H\)-Day Horizon
-With annualized volatility \(\sigma_{\text{ann}}\) from **daily log-returns**, scale to \(H\) days:
-\[
-\sigma_H=\sigma_{\text{ann}}\sqrt{\frac{H}{252}},
-\]
+```
+progress = (days_since_last_low mod P) / P
+θ = 2π × progress
+```
+
+where `θ` is the phase angle and `progress ∈ [0,1)` is the cycle time progress.
+
+### 5) Annualized Volatility → H-Day Horizon
+With annualized volatility `σ_ann` from **daily log-returns**, scale to `H` days:
+
+```
+σ_H = σ_ann × √(H / 252)
+```
+
 where **252** ≈ trading days per year.
 
-### 6) Probability Engines (for terminal price \(S_T\))
+### 6) Probability Engines (for terminal price S_T)
 
-**(0) Price-Normal (simplified):** assume \(S_T \sim \mathcal{N}(\mu_S,\sigma_S)\),
-\[
-\mu_S = S_0 (1 + \text{ER}),\qquad
-\sigma_S = S_0 \cdot \sigma_{\text{ann}}\sqrt{\tfrac{H}{252}}.
-\]
-Then
-- \(K \ge S_0\): \(\mathbb{P}(S_T\ge K)=1-\Phi\!\bigl(\tfrac{K-\mu_S}{\sigma_S}\bigr)\)
-- \(K \le S_0\): \(\mathbb{P}(S_T\le K)=\Phi\!\bigl(\tfrac{K-\mu_S}{\sigma_S}\bigr)\)
+**(0) Price-Normal (simplified):** assume `S_T ~ N(μ_S, σ_S)`,
 
-**(1) Log-Normal (normal log-returns — recommended):** let \(r=\ln(S_T/S_0)\sim \mathcal{N}(\mu_r,\sigma_r)\),  
-\(\sigma_r=\sigma_{\text{ann}}\sqrt{\tfrac{H}{252}},\ \mu_r\approx\ln(1+\text{ER})\). Then
-\[
-\mathbb{P}(S_T\ge K)=1-\Phi\!\Bigl(\frac{\ln(K/S_0)-\mu_r}{\sigma_r}\Bigr),\quad
-\mathbb{P}(S_T\le K)=\Phi\!\Bigl(\frac{\ln(K/S_0)-\mu_r}{\sigma_r}\Bigr).
-\]
+```
+μ_S = S_0 × (1 + ER)
+σ_S = S_0 × σ_ann × √(H / 252)
+```
 
-**(2) Student’s *t* (log-returns, fat tails):** \(r=\ln(S_T/S_0)\sim t_{\nu}(\mu_r,\sigma_r)\).  
-Replace \(\Phi\) by the Student-*t* CDF for better tail behavior.
+Then:
+- `K ≥ S_0`: `P(S_T ≥ K) = 1 - Φ((K - μ_S) / σ_S)`
+- `K ≤ S_0`: `P(S_T ≤ K) = Φ((K - μ_S) / σ_S)`
 
-**(3) Historical Simulation (non-parametric):** use past **\(H\)-day log-return** samples in a long window (e.g., 3 years) to form the empirical distribution:
-\[
-\widehat{\mathbb{P}}(S_T\ge K)=\frac{1}{N}\sum_{i=1}^N \mathbf{1}\!\left\{r_i \ge \ln(K/S_0)\right\}.
-\]
+**(1) Log-Normal (normal log-returns — recommended):** let `r = ln(S_T/S_0) ~ N(μ_r, σ_r)`,  
+`σ_r = σ_ann × √(H / 252)`, `μ_r ≈ ln(1 + ER)`. Then:
 
-> **ER (Expected Return)** can be set heuristically from **remaining upside × remaining time in the cycle**; log-models use \(\mu_r=\ln(1+\text{ER})\) for consistency.
+```
+P(S_T ≥ K) = 1 - Φ((ln(K/S_0) - μ_r) / σ_r)
+P(S_T ≤ K) = Φ((ln(K/S_0) - μ_r) / σ_r)
+```
 
-### 7) Event Probabilities (Up/Down \(x\%\), Reach Cycle High)
-- Up \(x\%\): set \(K=S_0(1+x)\) → compute \(\mathbb{P}(S_T\ge K)\)  
-- Down \(x\%\): set \(K=S_0(1-x)\) → compute \(\mathbb{P}(S_T\le K)\)  
-- Reach cycle high: set \(K=\text{cycle\_high}\)
+**(2) Student's t (log-returns, fat tails):** `r = ln(S_T/S_0) ~ t_ν(μ_r, σ_r)`.  
+Replace `Φ` by the Student-t CDF for better tail behavior.
+
+**(3) Historical Simulation (non-parametric):** use past **H-day log-return** samples in a long window (e.g., 3 years) to form the empirical distribution:
+
+```
+P̂(S_T ≥ K) = (1/N) × Σ[i=1 to N] 𝟙{r_i ≥ ln(K/S_0)}
+```
+
+> **ER (Expected Return)** can be set heuristically from **remaining upside × remaining time in the cycle**; log-models use `μ_r = ln(1 + ER)` for consistency.
+
+### 7) Event Probabilities (Up/Down x%, Reach Cycle High)
+- Up `x%`: set `K = S_0 × (1 + x)` → compute `P(S_T ≥ K)`  
+- Down `x%`: set `K = S_0 × (1 - x)` → compute `P(S_T ≤ K)`  
+- Reach cycle high: set `K = cycle_high`
 
 ### 8) Model Selection (Rolling Backtest + Brier Score)
-For each evaluation date \(t\), with horizon \(H\) and thresholds \(x\in\{2\%,5\%,10\%\}\), compare predicted probabilities \(p_t\) vs. realized binary outcomes \(y_t\):
-\[
-\text{Brier}=\frac{1}{n}\sum_{i=1}^n (p_i - y_i)^2\quad \text{(averaged across multiple thresholds)}.
-\]
-Choose the engine with the **lowest average Brier** as the production model.
+For each evaluation date `t`, with horizon `H` and thresholds `x ∈ {2%, 5%, 10%}`, compare predicted probabilities `p_t` vs. realized binary outcomes `y_t`:
+
+```
+Brier = (1/n) × Σ[i=1 to n] (p_i - y_i)²   
+```
 
 ---
 
@@ -192,7 +205,7 @@ Kai Yeh
 💻 GitHub: WayneKaiYeh
 ---
 📄 License
-https://licensebuttons.net/l/by-nc-nd/4.0/88x31.png
+https://licensebuttons.net/l/by-nc-nd/4.0/
 
 Allowed: Personal/educational use with attribution
 
