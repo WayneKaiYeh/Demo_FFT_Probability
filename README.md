@@ -74,7 +74,7 @@ Finally, a **rolling backtest** automatically selects the best-performing engine
 ## 📊 Demo Outputs (examples)
 
 - FFT spectrum & dominant period: `output/fft_spectrum.png`  
-  ![FFT](output/fft_spectrum.png)
+  ![FFT](output/fft.png)
 
 - Up/Down probability printout: `output/probabilities_example.png`  
   ![Probabilities](output/probabilities_example.png)
