@@ -40,31 +40,31 @@ Finally, a **rolling backtest** automatically selects the best-performing engine
 
 ```
 
-                                  [Tickers / Data]
-                                         │
-                                         ▼
-                             [Preprocess & Indicators]
-                                         │
-                                         ▼
-                             [FFT (Frequency → Period)]
-                                         │
-                                         ▼
-                            [Best Observation Window X]
-                                         │
-                                         ▼
-                              [Return-Driven Period]
-                                         │
-                                         ▼
-                                 [Phase Progress]
-                                         │
-                                         ▼
-      [Probability Engines: Price-Normal | Log-Normal | Student t | Historical]
-                                         │
-                                         ▼
-                      [Rolling Backtest → Find the Best Model]
-                                         │
-                                         ▼
-                    [Probabilities: Up/Down x% & Reach High]
+                                          [Tickers / Data]
+                                                 │
+                                                 ▼
+                                     [Preprocess & Indicators]
+                                                 │
+                                                 ▼
+                                     [FFT (Frequency → Period)]
+                                                 │
+                                                 ▼
+                                    [Best Observation Window X]
+                                                 │
+                                                 ▼
+                                      [Return-Driven Period]
+                                                 │
+                                                 ▼
+                                         [Phase Progress]
+                                                 │
+                                                 ▼
+              [Probability Engines: Price-Normal | Log-Normal | Student t | Historical]
+                                                 │
+                                                 ▼
+                              [Rolling Backtest → Find the Best Model]
+                                                 │
+                                                 ▼
+                            [Probabilities: Up/Down x% & Reach High]
 
 ```
 
